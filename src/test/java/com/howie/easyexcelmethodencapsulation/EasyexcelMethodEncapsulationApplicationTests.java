@@ -1,17 +1,25 @@
 package com.howie.easyexcelmethodencapsulation;
 
+import com.alibaba.excel.util.ObjectUtils;
 import com.alibaba.excel.util.StringUtils;
 import com.howie.easyexcelmethodencapsulation.excel.ExcelUtil;
 import com.howie.easyexcelmethodencapsulation.test.ImportInfo;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,7 +31,7 @@ import java.util.stream.Collectors;
 public class EasyexcelMethodEncapsulationApplicationTests {
 
 	@Test
-	public void contextLoads() {
+	public void contextLoads() throws InvalidFormatException {
 
 		String excelPath="/Users/luodengxiong/Downloads/dingtalk5.xlsx";
 		System.out.println("获取文件:"+excelPath);
@@ -31,7 +39,7 @@ public class EasyexcelMethodEncapsulationApplicationTests {
 		FileInputStream fileInputStream= null;
 		try {
 			fileInputStream = new FileInputStream(excelFile);
-			//要读取的sheet 从1开始
+			//要读取的sheet 这里从1开始
 			int sheetNo=3;
 			//要读取的行 从0开始
 			int headLineNum=3;
@@ -67,13 +75,59 @@ public class EasyexcelMethodEncapsulationApplicationTests {
 			map=list.stream().collect(
 					Collectors.groupingBy(ImportInfo::getName,Collectors.counting())
 			);
-
-
 			System.out.println(map);
+            String sourceFilePath="/Users/luodengxiong/Downloads/tjb2.xlsx";
+            String destFilePath="/Users/luodengxiong/Downloads/tjbnn.xlsx";
+            //这里是第二个sheet
+            int sheetAt=1;
+            repalceValue(sourceFilePath,sheetAt,map,destFilePath);
 		} catch (FileNotFoundException e) {
 			System.out.println("获取文件异常");
 			e.printStackTrace();
-		}
-	}
+		} catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 根据文件模板替换内容
+     * @param sourceFilePath
+     * @param sheetAt
+     * @param map
+     * @param destFilePath
+     * @throws IOException
+     * @throws InvalidFormatException
+     */
+	public void repalceValue(String sourceFilePath,int sheetAt, Map<String, Long> map,String destFilePath) throws IOException, InvalidFormatException {
+	    //WorkbookFactory.create 方法兼容Excel新旧版本
+        File excelFile=new File(sourceFilePath);
+        Workbook wb=WorkbookFactory.create(excelFile);
+        Sheet sheet = wb.getSheetAt(sheetAt) ;//获取第 sheetAt 个 sheet里的内容
+        if (Objects.nonNull(map)) {
+            int rowNum= sheet.getLastRowNum();//该sheet页里最多有几行内容
+            for(int i=3;i<rowNum;i++) {//从第4行开始，循环每一行
+                Row row=sheet.getRow(i);
+                //第3列是姓名 第9列是需要替换的数值
+                Cell cell = row.getCell((short)2);
+                String personName=cell.getStringCellValue();
+                System.out.println("personName:"+personName);
+                for (String peopleName:map.keySet()){
+                    if(peopleName.equals(personName)){
+                        Cell cellReplace = row.getCell((short)8);
+                        Integer times= map.get(peopleName).intValue();
+                        cellReplace.setCellValue(times);
+                    }
+                }
+            }
+
+        }
+        //替换内容后保存新的文件
+        OutputStream outputStream = new FileOutputStream(destFilePath);
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
+        wb.close();
+    }
 
 }
