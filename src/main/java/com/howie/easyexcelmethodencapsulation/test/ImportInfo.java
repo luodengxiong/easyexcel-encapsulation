@@ -3,6 +3,9 @@ package com.howie.easyexcelmethodencapsulation.test;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.BaseRowModel;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Created with IntelliJ IDEA
  *
@@ -15,15 +18,32 @@ public class ImportInfo extends BaseRowModel {
     @ExcelProperty(index = 0)
     private String name;
 
-    @ExcelProperty(index = 1)
-    private String age;
+    @ExcelProperty(index = 5)
+    private String date;
 
-    @ExcelProperty(index = 2)
-    private String email;
+    @ExcelProperty(index = 6)
+    private String standTime;
 
-    /*
-        作为 excel 的模型映射，需要 setter 方法
-     */
+    @ExcelProperty(index = 7)
+    private String cardTime;
+
+    @ExcelProperty(index = 8)
+    private String result;
+
+
+
+    private LocalDateTime standTimeLocal;
+    private LocalDateTime cardTimeLocal;
+
+
+    public LocalDateTime getStandTimeLocal() {
+        return standTimeLocal;
+    }
+
+    public LocalDateTime getCardTimeLocal() {
+        return cardTimeLocal;
+    }
+
     public String getName() {
         return name;
     }
@@ -32,28 +52,58 @@ public class ImportInfo extends BaseRowModel {
         this.name = name;
     }
 
-    public String getAge() {
-        return age;
+    public String getDate() {
+        return date;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public String getEmail() {
-        return email;
+    public String getStandTime() {
+        return standTime;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setStandTime(String standTime) {
+        this.standTime = standTime;
+        String s = this.standTime  +":00";
+        LocalDateTime beginDateTime = LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.standTimeLocal = beginDateTime;
+    }
+
+    public String getCardTime() {
+        return cardTime;
+    }
+
+    public void setCardTime(String cardTime) {
+        this.cardTime = cardTime;
+        String s = this.cardTime  +":00";
+        LocalDateTime beginDateTime = LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.cardTimeLocal = beginDateTime;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 
     @Override
     public String toString() {
-        return "Info{" +
-                "name='" + name + '\'' +
-                ", age='" + age + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"name\":\"")
+                .append(name).append('\"');
+        sb.append(",\"date\":\"")
+                .append(date).append('\"');
+        sb.append(",\"standTime\":\"")
+                .append(standTime).append('\"');
+        sb.append(",\"cardTime\":\"")
+                .append(cardTime).append('\"');
+        sb.append(",\"result\":\"")
+                .append(result).append('\"');
+        sb.append('}');
+        return sb.toString();
     }
 }

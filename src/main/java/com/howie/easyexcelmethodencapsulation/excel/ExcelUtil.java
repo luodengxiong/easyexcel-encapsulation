@@ -2,13 +2,17 @@ package com.howie.easyexcelmethodencapsulation.excel;
 
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.metadata.BaseRowModel;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import com.howie.easyexcelmethodencapsulation.test.ImportInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +43,7 @@ public class ExcelUtil {
             }
             reader.read(sheet);
         }
-        return excelListener.getDatas();
+        return excelListener.getRows();
     }
 
     /**
@@ -71,7 +75,7 @@ public class ExcelUtil {
             return null;
         }
         reader.read(new Sheet(sheetNo, headLineNum, rowModel.getClass()));
-        return excelListener.getDatas();
+        return excelListener.getRows();
     }
 
     /**
@@ -150,4 +154,54 @@ public class ExcelUtil {
         }
         return null;
     }
+
+    private static ExcelReader getReaderByInputStream(InputStream inputStream,
+                                                      ExcelListener excelListener) {
+        return new ExcelReader(inputStream, null, excelListener, false);
+    }
+
+    public static List<Object> readExcelByInputStream(InputStream inputStream, BaseRowModel rowModel, int sheetNo,
+                                                      int headLineNum) {
+        ExcelListener excelListener = new ExcelListener();
+        ExcelReader reader = getReaderByInputStream(inputStream, excelListener);
+        if (reader == null) {
+            return null;
+        }
+        reader.read(new Sheet(sheetNo, headLineNum, rowModel.getClass()));
+        return excelListener.getRows();
+    }
+
+    /**
+     * 从Excel中读取文件，读取的文件是一个DTO类，该类必须继承BaseRowModel
+     * https://www.jianshu.com/p/80505fb72493
+     * 具体实例参考 ： MemberMarketDto.java
+     * 参考：https://github.com/alibaba/easyexcel
+     * 字符流必须支持标记，FileInputStream 不支持标记，可以使用BufferedInputStream 代替
+     * BufferedInputStream bis = new BufferedInputStream(new FileInputStream(...));
+     */
+    public static <T extends BaseRowModel> List<T> getRowsByInputStream(final InputStream inputStream, final Class<? extends BaseRowModel> clazz, int sheetNo,int headLineNum) {
+        if (null == inputStream) {
+            throw new NullPointerException("the inputStream is null!");
+        }
+        ExcelListener<T> excelListener = new ExcelListener<>();
+        // 这里因为EasyExcel-1.1.1版本的bug，所以需要选用下面这个标记已经过期的版本
+        ExcelReader reader =new ExcelReader(inputStream, null, excelListener, false);
+        reader.read(new com.alibaba.excel.metadata.Sheet(sheetNo, headLineNum, clazz));
+
+        return excelListener.getRows();
+    }
+
+    public static void writeExcel(final File file, List<? extends BaseRowModel> list) {
+        try (OutputStream out = new FileOutputStream(file)) {
+            ExcelWriter writer = new ExcelWriter(out, ExcelTypeEnum.XLSX);
+            //写第一个sheet,  有模型映射关系
+            Class<? extends BaseRowModel> t = list.get(0).getClass();
+            Sheet sheet = new Sheet(1, 0, t);
+            writer.write(list, sheet);
+            writer.finish();
+        } catch (IOException e) {
+
+        }
+    }
+
 }
