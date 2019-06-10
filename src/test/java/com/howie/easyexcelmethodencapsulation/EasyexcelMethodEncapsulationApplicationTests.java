@@ -122,6 +122,8 @@ public class EasyexcelMethodEncapsulationApplicationTests {
             }
 
         }
+		//需要更新公式内容
+		sheet.setForceFormulaRecalculation(true);
         //替换内容后保存新的文件
         OutputStream outputStream = new FileOutputStream(destFilePath);
         wb.write(outputStream);
