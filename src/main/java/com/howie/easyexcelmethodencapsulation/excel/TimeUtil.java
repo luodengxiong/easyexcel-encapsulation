@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @desc: 基于Java8的时间日期工具类
@@ -32,6 +34,10 @@ public final class TimeUtil {
         return LocalDateTime.parse(timeStr, DEFAULT_DATETIME_FORMATTER);
     }
 
+    public static LocalDate parseDate(String timeStr) {
+        return LocalDate.parse(timeStr, TimeFormat.SHORT_DATE_PATTERN_LINE.formatter);
+    }
+
     /**
      * String 转时间
      *
@@ -43,6 +49,10 @@ public final class TimeUtil {
         return LocalDateTime.parse(timeStr, format.formatter);
     }
 
+    public static LocalDate parseDate(String dateString, TimeFormat format) {
+        return LocalDate.parse(dateString, format.formatter);
+    }
+
     /**
      * 时间转 String
      *
@@ -51,6 +61,10 @@ public final class TimeUtil {
      */
     public static String parseTime(LocalDateTime time) {
         return DEFAULT_DATETIME_FORMATTER.format(time);
+    }
+
+    public static String parseDate(LocalDate date) {
+        return TimeFormat.SHORT_DATE_PATTERN_LINE.formatter.format(date);
     }
 
     /**
@@ -121,7 +135,7 @@ public final class TimeUtil {
 
     public static void main(String[] args) {
 
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+/*        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         //获取当前时间
         LocalDate inputDate = LocalDate.now();
 
@@ -150,7 +164,20 @@ public final class TimeUtil {
         System.out.println("monthStart:"+monthStart);
         //本月的最后一天
         String monthEnd = df.format(inputDate.with(TemporalAdjusters.lastDayOfMonth()));
-        System.out.println("monthEnd:"+monthEnd);
+        System.out.println("monthEnd:"+monthEnd);*/
+        //yyyy-MM-dd
+        Pattern datePatternLong=Pattern.compile(" (([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)");
+        //yyyyMMdd
+        Pattern datePattern=Pattern.compile("(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})(((0[13578]|1[02])(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)");
+        String filePathFull="D:\\TFS\\SAAS平台\\01开发库\\0111项目管理\\011103会议纪要\\07.其他\\LYZH-会议记录-团建活动-20190531.docx";
+        Matcher matcher=datePattern.matcher(filePathFull);
+        if(matcher.find()) {
+            String date = matcher.group(1);
+            System.out.println("date:" + date);
+            LocalDate fileDate = TimeUtil.parseDate(date,TimeUtil.TimeFormat.SHORT_DATE_PATTERN_NONE);
+            System.out.println("fileDate:"+TimeUtil.parseDate(fileDate));
+        }
+
     }
 
 }
