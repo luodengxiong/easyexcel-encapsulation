@@ -1,23 +1,12 @@
 package com.howie.easyexcelmethodencapsulation;
 
-import com.alibaba.excel.util.ObjectUtils;
 import com.alibaba.excel.util.StringUtils;
 import com.howie.easyexcelmethodencapsulation.excel.ExcelUtil;
 import com.howie.easyexcelmethodencapsulation.test.ImportInfo;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -33,7 +22,7 @@ public class EasyexcelMethodEncapsulationApplicationTests {
 	@Test
 	public void contextLoads() throws InvalidFormatException {
 
-		String excelPath="/Users/luodengxiong/Downloads/dingtalk5.xlsx";
+		String excelPath="D:\\fhl\\6.22~6.28(钉钉).xlsx";
 		System.out.println("获取文件:"+excelPath);
 		File excelFile=new File(excelPath);
 		FileInputStream fileInputStream= null;
@@ -76,8 +65,8 @@ public class EasyexcelMethodEncapsulationApplicationTests {
 					Collectors.groupingBy(ImportInfo::getName,Collectors.counting())
 			);
 			System.out.println(map);
-            String sourceFilePath="/Users/luodengxiong/Downloads/tjb2.xlsx";
-            String destFilePath="/Users/luodengxiong/Downloads/tjbnn.xlsx";
+            String sourceFilePath="D:\\fhl\\LYZH-研发内部学习月活动情况统计表-20190629-0.xlsx";
+            String destFilePath="D:\\fhl\\LYZH-研发内部学习月活动情况统计表-20190629.xlsx";
             //这里是第二个sheet
             int sheetAt=1;
             repalceValue(sourceFilePath,sheetAt,map,destFilePath);
@@ -111,19 +100,19 @@ public class EasyexcelMethodEncapsulationApplicationTests {
                 //第3列是姓名 第9列是需要替换的数值
                 Cell cell = row.getCell((short)2);
                 String personName=cell.getStringCellValue();
-                System.out.println("personName:"+personName);
+
                 for (String peopleName:map.keySet()){
-                    if(peopleName.equals(personName)){
+                    if(peopleName.equals(personName) || (peopleName.endsWith("1") && peopleName.contains(personName)  )){
                         Cell cellReplace = row.getCell((short)8);
                         Integer times= map.get(peopleName).intValue();
+						System.out.println("personName:"+personName + " 次数 "+ times);
                         cellReplace.setCellValue(times);
                     }
                 }
             }
-
         }
-		//需要更新公式内容
-		sheet.setForceFormulaRecalculation(true);
+        //需要更新公式内容
+        sheet.setForceFormulaRecalculation(true);
         //替换内容后保存新的文件
         OutputStream outputStream = new FileOutputStream(destFilePath);
         wb.write(outputStream);
@@ -131,5 +120,6 @@ public class EasyexcelMethodEncapsulationApplicationTests {
         outputStream.close();
         wb.close();
     }
+
 
 }

@@ -11,11 +11,14 @@ import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * @desc: 读取文件
+ * @author: luodengxiong
  * @date: 2019/6/21 8:54:35
  **/
 public class GetFilesTest {
@@ -23,10 +26,10 @@ public class GetFilesTest {
 
     @Test
     public void getFile(){
-        String path="D:\\TEMP";
+        String path="D:\\TFS";
         File tfsFileRoot=new File(path);
 
-
+        System.out.println("path:"+path);
         traverseFolder(tfsFileRoot);
 
         LocalDate inputDate = LocalDate.now();
@@ -56,32 +59,55 @@ public class GetFilesTest {
         for (int i=0;i<tfsFiles.length;i++){
             File tfsFile=tfsFiles[i];
             String filePath=tfsFile.getPath();
-            if (filePath.contains("A")
-                    || filePath.contains("B")
-                    || filePath.contains("C")
-                    || filePath.contains("D")
-                    || filePath.contains("E")
-                    || filePath.contains("F")
+            if (filePath.contains("SAAS平台")
+                    || filePath.contains("研发中心")
+                    || filePath.contains("智慧城管")
+                    || filePath.contains("智慧分类")
+                    || filePath.contains("智慧环卫")
+                    || filePath.contains("智慧物联")
                     ) {
                 if (tfsFile.isDirectory()) {
                     traverseFolder(tfsFile);
                 } else {
-                    Boolean filterFiles=!filePath.contains("F1")
+                    Boolean filterFiles=!filePath.contains("每日例会")
                             && !filePath.contains("2018")
-                            && !filePath.contains("F2")
-                            && !filePath.contains("F3")
-                            && !filePath.contains("F4");
-
+                            && !filePath.contains("活动纪要")
+                            && !filePath.contains("诸暨项目")
+                            && !filePath.contains("15研发共享");
+                    Boolean docFile4T689=filePath.contains("\\SAAS平台\\01开发库\\0111项目管理\\011103会议纪要") && filePath.contains(".doc");
+                    Boolean docFile4T7=filePath.contains("\\研发中心\\02客户端开发\\会议记录") && filePath.contains(".doc");
+                    Boolean docFile4G125=filePath.contains("\\研发中心\\01系统测试\\会议记录") && filePath.contains(".doc");
+                    Boolean docFile4T12=filePath.contains("\\智慧分类\\01开发库\\0111项目管理\\011103会议纪要") && filePath.contains(".doc");
+                    Boolean docFile4T3=filePath.contains("\\智慧环卫\\01开发库\\0111项目管理\\011103会议纪要") && filePath.contains(".doc");
+                    Boolean docFile4T4=filePath.contains("\\智慧城管\\01开发库\\0111项目管理\\011103会议纪要\\智慧城管") && filePath.contains(".doc");
+                    Boolean docFile4T5=filePath.contains("\\智慧物联\\01开发库\\0111项目管理\\011103会议纪要") && filePath.contains(".doc");
                     Instant instant = Instant.ofEpochMilli(tfsFile.lastModified());
                     LocalDateTime fileLastModified=LocalDateTime.ofInstant(instant,ZoneId.systemDefault());
                     LocalDate inputDate = LocalDate.now();
                     //本周开始时间
                     TemporalAdjuster FIRST_OF_WEEK =
                             TemporalAdjusters.ofDateAdjuster(localDate -> localDate.minusDays(localDate.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue()));
-                    if (filterFiles
+                    if (filterFiles&& (docFile4T689 || docFile4T7 || docFile4G125 || docFile4T12 || docFile4T3 ||docFile4T4 || docFile4T5)
                             && fileLastModified.isAfter(LocalDateTime.of(inputDate.with(FIRST_OF_WEEK),LocalTime.of(18, 30)))) {
                         String teamName="T1";
-
+                        if (docFile4T689){
+                            teamName="T6";
+                        }
+                        if (docFile4T7){
+                            teamName="T4";
+                        }
+                        if (docFile4G125){
+                            teamName="G1";
+                        }
+                        if (docFile4T3){
+                            teamName="T3";
+                        }
+                        if (docFile4T4){
+                            teamName="T4";
+                        }
+                        if (docFile4T5){
+                            teamName="T5";
+                        }
                         String filePathFull=tfsFile.getPath();
                         Matcher matcher=datePattern.matcher(filePathFull);
                         String date = "";
@@ -95,7 +121,7 @@ public class GetFilesTest {
                             fileVOList.add(fileVO);
                         }
                         //System.out.println("fileVOList:"+fileVOList.size());
-                        //System.out.println(teamName+ ": " + tfsFile.getPath());
+                        System.out.println(teamName+ ": " + tfsFile.getPath());
                     }
                 }
             }
